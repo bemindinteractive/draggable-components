@@ -200,9 +200,11 @@ public class DraggableLayout extends FrameLayout {
     }
 
     private void setIfScrollViewCanScroll() {
-        ScrollView scrollView = (ScrollView) getChildAt(0);
-        View child = scrollView.getChildAt(0);
-        isScollViewScrollable = scrollView.getHeight() < child.getHeight() + scrollView.getPaddingTop() + scrollView.getPaddingBottom();
+        if(getChildAt(0) instanceof ScrollView) {
+            ScrollView scrollView = (ScrollView) getChildAt(0);
+            View child = scrollView.getChildAt(0);
+            isScollViewScrollable = scrollView.getHeight() < child.getHeight() + scrollView.getPaddingTop() + scrollView.getPaddingBottom();
+        }
     }
 
 
