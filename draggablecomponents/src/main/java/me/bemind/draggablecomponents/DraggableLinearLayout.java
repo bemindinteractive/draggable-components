@@ -5,22 +5,19 @@ import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.graphics.Point;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 /**
- * Created by angelomoroni on 11/01/16.
+ * Created by debug on 20/10/15.
  */
-public class DraggableLayout extends FrameLayout {
+public class DraggableLinearLayout extends LinearLayout {
 
-    private static final String TAG = DraggableLayout.class.getName();
-    private static final Boolean DEBUG = true;
     private boolean animating = false;
 
     private float mLastX,mStartY,mStartX,mLastY;
@@ -34,26 +31,24 @@ public class DraggableLayout extends FrameLayout {
     private int windowwidth;
     private int  x_cord,y_cord,x,y;
     private int screenCenter;
-    private Boolean isScollViewScrollable ;
-
+    private boolean isScollViewScrollable = false;
+    
     private OnDragActionEndListener onDragActionEndListener;
-
-
-    public DraggableLayout(Context context) {
+    
+    public DraggableLinearLayout(Context context) {
         super(context);
         init();
     }
 
-    public DraggableLayout(Context context, AttributeSet attrs) {
+    public DraggableLinearLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public DraggableLayout(Context context, AttributeSet attrs, int defStyleAttr) {
+    public DraggableLinearLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
-
 
     private void init() {
 
@@ -83,22 +78,18 @@ public class DraggableLayout extends FrameLayout {
                 iX = getX();
 
                 setIfScrollViewCanScroll();
-                if(DEBUG) Log.d(TAG, "INT MotionEvent.ACTION_DOWN");
-                if(DEBUG) Log.d(TAG, "INT mIsAnimating: " + mIsAnimating);
-                mIsAnimating = false;
-
+//                Log.d(TAG, "INT MotionEvent.ACTION_DOWN");
+//                Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
                 break;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 mIsAnimating = false;
-                if(DEBUG) Log.d(TAG,"INT MotionEvent.ACTION_CANCEL or MotionEvent.ACTION_UP");
-                if(DEBUG) Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
+//                Log.d(TAG,"INT MotionEvent.ACTION_CANCEL or MotionEvent.ACTION_UP");
+//                Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
                 break;
             case MotionEvent.ACTION_MOVE:
-
-                if(DEBUG) Log.d(TAG,"INT MotionEvent.ACTION_MOVE");
-                if(DEBUG) Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
-
+//                Log.d(TAG,"INT MotionEvent.ACTION_MOVE");
+//                Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
                 float x = ev.getRawX();
                 float y = ev.getRawY();
                 float xDelta = Math.abs(x - mLastX);
@@ -106,11 +97,11 @@ public class DraggableLayout extends FrameLayout {
 
                 float yDeltaTotal = y - mStartY;
                 float xDeltaTotal = x - mStartX;
-                if(mIsAnimating || isDraggable()){
+                if(mIsAnimating || !isScollViewScrollable){
 
-                    if(DEBUG) Log.d(TAG,"INT MotionEvent.ACTION_MOVE ANIMATING");
-                    if(DEBUG) Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
 
+//                    Log.d(TAG,"INT MotionEvent.ACTION_MOVE ANIMATING");
+//                    Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
 
                     return true;
 
@@ -118,36 +109,48 @@ public class DraggableLayout extends FrameLayout {
                     if (Math.abs(xDelta)>Math.abs(yDelta) && Math.abs(xDelta) > mTouchSlop) {
                         mIsAnimating = true;
                         mStartX = x;
-                        if(DEBUG) Log.d(TAG,"INT MotionEvent.ACTION_MOVE start ANIMATING");
-                        if(DEBUG) Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
+//                        Log.d(TAG,"INT MotionEvent.ACTION_MOVE start ANIMATING");
+//                        Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
                         return true;
                     }else  {
                         mIsAnimating = false;
-                        if(DEBUG) Log.d(TAG,"INT MotionEvent.ACTION_MOVE stop ANIMATING");
-                        if(DEBUG) Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
+//                        Log.d(TAG,"INT MotionEvent.ACTION_MOVE stop ANIMATING");
+//                        Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
 
+                        //mStartY = y;
+                        //return false;
                     }
                 }
 
                 break;
         }
 
-        return mIsAnimating;
+        return false;
+    }
+
+    private void setIfScrollViewCanScroll() {
+        try {
+            ScrollView scrollView = (ScrollView) getChildAt(0);
+            View child = scrollView.getChildAt(0);
+            isScollViewScrollable = scrollView.getHeight() < child.getHeight() + scrollView.getPaddingTop() + scrollView.getPaddingBottom();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
         switch (event.getAction()){
-            case MotionEvent.ACTION_DOWN:
-//                if(getChildCount() == 0) return true;
-                return true;
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
                 mIsAnimating = false;
+                //Log.d(TAG,"INT MotionEvent.ACTION_CANCEL or MotionEvent.ACTION_UP");
+                //Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
 
                 if (action == 0) {
-                   if(onDragActionEndListener != null) onDragActionEndListener.onDrag(1f);
+                    // Log.e("Event Status", "Nothing");
+                    onDragActionEndListener.onDrag(1f);
                     animate().y(iY).x(iX).rotation(0).setListener(new AnimatorListenerAdapter() {
                         @Override
                         public void onAnimationEnd(Animator animation) {
@@ -158,7 +161,7 @@ public class DraggableLayout extends FrameLayout {
 
                 } else {
 
-
+                    
                     if(onDragActionEndListener != null){
                         onDragActionEndListener.remove();
                     }else {
@@ -176,17 +179,14 @@ public class DraggableLayout extends FrameLayout {
 
                 break;
             case MotionEvent.ACTION_MOVE:
-
-                if(DEBUG) Log.d(TAG,"INT MotionEvent.ACTION_MOVE ANIMATING");
-                if(DEBUG) Log.d(TAG,"INT mIsAnimating: "+mIsAnimating);
                 x_cord = (int) event.getRawX();
                 y_cord = (int) event.getRawY();
 
                 setX(iX + (x_cord - mLastX));
                 setY(iY + (y_cord - mLastY));
-               if(onDragActionEndListener != null) onDragActionEndListener.onDrag(
+                onDragActionEndListener.onDrag(
                         Math.abs(screenCenter - Math.abs(x_cord - mLastX))
-                                / screenCenter);
+                         / screenCenter);
                 if (x_cord >= screenCenter) {
                     setRotation((float) ((x_cord - mLastX) * (Math.PI / 42)));
 
@@ -227,33 +227,15 @@ public class DraggableLayout extends FrameLayout {
 
     }
 
-    private void setIfScrollViewCanScroll() {
-        try {
-            if (getChildAt(0) instanceof ScrollView) {
-                ScrollView scrollView = (ScrollView) getChildAt(0);
-                View child = scrollView.getChildAt(0);
-                isScollViewScrollable = scrollView.getHeight() < child.getHeight() + scrollView.getPaddingTop() + scrollView.getPaddingBottom();
-            }
-        }catch (Exception e){
-
-        }
-    }
-
-    //stiamo dicendo che se la probabile scrollview figlia è scrollabile allora non è draggable, altrimenti
-    //possiamo spostare il layout
-    private boolean isDraggable(){
-        return isScollViewScrollable !=null && !isScollViewScrollable;
-    }
-
-
-    public void setOnDragActionEndListener(DraggableLayout.OnDragActionEndListener onDragActionEndListener) {
+    public void setOnDragActionEndListener(DraggableLinearLayout.OnDragActionEndListener onDragActionEndListener) {
         this.onDragActionEndListener = onDragActionEndListener;
     }
 
-
+    
     public static abstract class OnDragActionEndListener{
         public abstract void remove();
         public abstract void onDrag(float value);
 
     }
+
 }
