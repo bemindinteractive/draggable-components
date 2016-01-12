@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">DraggableComponentsApplication</string>
+    <string name="app_name_s">SHOW</string>
 </resources>
